@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="一、什么是计算机1、什么是计算机&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;计算机（computer）俗称电脑，是现代一种用于高速计算的电子计算机器，可以进行数值计算，又可以进行逻辑计算，还具有存储记忆功能。是能够按照程序运行，自动、高速处理海量数据的现代化智能电子设备。 &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;大">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算机体系结构与软件开发语言">
+<meta property="og:url" content="http://example.com/2021/07/13/computer/computer1/index.html">
+<meta property="og:site_name" content="Wi Gang">
+<meta property="og:description" content="一、什么是计算机1、什么是计算机&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;计算机（computer）俗称电脑，是现代一种用于高速计算的电子计算机器，可以进行数值计算，又可以进行逻辑计算，还具有存储记忆功能。是能够按照程序运行，自动、高速处理海量数据的现代化智能电子设备。 &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;大">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/f7bd4d9bc294459e9cd7c90ce8c026c1.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/9589dbb74b244c739d317e5ccebf6157.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/7b115650e2d54fe0abdd296b8a1e6971.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/34d8ffa76f9d483286e2d811e3d5978b.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/a2b4d7f54a654318b714be105f5453d5.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/89ab9edaf7a54b8ebfaf2e577b224ce9.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="article:published_time" content="2021-07-13T12:46:25.000Z">
+<meta property="article:modified_time" content="2022-01-23T14:15:54.933Z">
+<meta property="article:author" content="Wi Gang">
+<meta property="article:tag" content="计算机体系">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/f7bd4d9bc294459e9cd7c90ce8c026c1.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16">
+
+<link rel="canonical" href="http://example.com/2021/07/13/computer/computer1/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>计算机体系结构与软件开发语言 | Wi Gang</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Wi Gang</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">哟，又在偷偷写bug了！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/13/computer/computer1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/WechatIMG22.jpg">
+      <meta itemprop="name" content="Wi Gang">
+      <meta itemprop="description" content="这个人没有简介哎😮‍💨😮‍💨😮‍💨😮‍💨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Wi Gang">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          计算机体系结构与软件开发语言
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-07-13 20:46:25" itemprop="dateCreated datePublished" datetime="2021-07-13T20:46:25+08:00">2021-07-13</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-01-23 22:15:54" itemprop="dateModified" datetime="2022-01-23T22:15:54+08:00">2022-01-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB/" itemprop="url" rel="index"><span itemprop="name">计算机体系</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2021/07/13/computer/computer1/" class="post-meta-item leancloud_visitors" data-flag-title="计算机体系结构与软件开发语言" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="一、什么是计算机"><a href="#一、什么是计算机" class="headerlink" title="一、什么是计算机"></a>一、什么是计算机</h2><h3 id="1、什么是计算机"><a href="#1、什么是计算机" class="headerlink" title="1、什么是计算机"></a>1、什么是计算机</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;计算机（computer）俗称电脑，是现代一种用于高速计算的<strong>电子计算机器</strong>，可以进行数值计算，又可以进行逻辑计算，还具有存储记忆功能。是能够按照程序运行，自动、高速处理海量数据的现代化智能电子设备。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;大多数人认为计算机就是我们桌面的电脑，实际上计算机已经深入到我们信息化生活的方方面面。除了大家熟知的个人电脑、服务器和工作站等通用计算机外，像手机、数码相机、数字电视、游戏机、打印机、路由器等设备的核心部件都是计算机，都是计算机体系结构研究的范围。也许此刻你的身上就有好几台计算机。</p>
+<span id="more"></span>
+<p>​    <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/av79495884/">https://www.bilibili.com/video/av79495884/</a></p>
+<h3 id="2、计算机发展历史"><a href="#2、计算机发展历史" class="headerlink" title="2、计算机发展历史"></a>2、计算机发展历史</h3><h4 id="nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-1-诞生"><a href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-1-诞生" class="headerlink" title="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.1  诞生"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.1  诞生</h4><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1946年2月14日，由美国军方定制的世界上第一台电子计算机“<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/%E7%94%B5%E5%AD%90%E6%95%B0%E5%AD%97%E7%A7%AF%E5%88%86%E8%AE%A1%E7%AE%97%E6%9C%BA">电子数字积分计算机</a>”（ENIAC Electronic Numerical And Calculator）在美国<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/%E5%AE%BE%E5%A4%95%E6%B3%95%E5%B0%BC%E4%BA%9A%E5%A4%A7%E5%AD%A6">宾夕法尼亚大学</a>问世了。ENIAC（中文名：<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/%E5%9F%83%E5%B0%BC%E9%98%BF%E5%85%8B">埃尼阿克</a>）是美国奥伯丁武器试验场为了满足计算弹道需要而研制成的，这台计算器使用了17840支电子管，大小为80英尺×8<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/%E8%8B%B1%E5%B0%BA">英尺</a>，重达28t（吨），功耗为170kW，其运算速度为每秒5000次的加法运算，造价约为487000美元。ENIAC的问世具有划时代的意义，表明电子计算机时代的到来。在以后60多年里，计算机技术以惊人的速度发展，没有任何一门技术的<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/%E6%80%A7%E8%83%BD%E4%BB%B7%E6%A0%BC%E6%AF%94/4963335">性能价格比</a>能在30年内增长6个数量级。</p>
+<h4 id="nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-2-发展"><a href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-2-发展" class="headerlink" title="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.2  发展"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.2  发展</h4><ul>
+<li>第一代：电子管计算机时代。时间：１９４６～１９５８年。这一代计算机的主要逻辑器件是电子管，使用的是机器<strong>语言编程，之后又产生了汇编语言</strong>。运算速度为每秒几千次到几万次。主要应用范围为科学计算、军事和科学研究。</li>
+<li>第二代：晶体管计算机时代。时间：１９５９～１９６４年。这一代计算机的主要逻辑器件是晶体管，已经出现了管理程序和ＦＯＲＴＲＡＮ等<strong>高级编程语言</strong>。运算速度为每秒几十万次。主要应用范围为数据处理、自动控制等。</li>
+<li>第三代：中小规模集成电路计算机时代。时间：１９６５～１９７０年。这一代计算机的主要逻辑器件是中、小规模集成电路，此时已经出现了<strong>操作系统</strong>、诊断程序和ＢＡＳＩＣ、ＰＡＳＣＡＬ等高级语言。运算速度为每秒几十万次到几百万次。主要应用范围为科学计算、数据处理、事务管理、工业控制等领域。</li>
+<li>第四代：大规模集成电路计算机时代。时间：１９７１年以后。这一代计算机的主要逻辑器件是大规模和超大规模集成电路以及微处理器芯片，由于运算速度快、存储容量大、计算机技术与网络技术和通信技术相融合，使计算机软件有了突飞猛进的发展，各种操作系统、数据库技术和各种应用软件应运而生。</li>
+</ul>
+<h2 id="二、计算机系统组成"><a href="#二、计算机系统组成" class="headerlink" title="二、计算机系统组成"></a>二、计算机系统组成</h2><p>​    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;计算机系统由硬件系统和软件系统所组成，没有安装任何软件的计算机称为裸机。整体结构如下<br><img src="https://img-blog.csdnimg.cn/f7bd4d9bc294459e9cd7c90ce8c026c1.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<h3 id="1、计算机硬件系统"><a href="#1、计算机硬件系统" class="headerlink" title="1、计算机硬件系统"></a>1、计算机硬件系统</h3><h4 id="nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-1-1-冯·诺依曼结构与哈佛结构"><a href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-1-1-冯·诺依曼结构与哈佛结构" class="headerlink" title="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1 冯·诺依曼结构与哈佛结构"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1 冯·诺依曼结构与哈佛结构</h4><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;现代计算机都采用存储程序结构，又称为冯·诺依曼结构，是 1945 年匈牙利籍数学家冯·诺依曼受宾夕法尼亚大学研制的 ENIAC 计算机结构的启发提出的，是世界上第一个完整的计算机体系结构。冯·诺依曼结构体系下，计算机由存储器、运算器、控制器、输入设备和输出设备五部分组成，其中运算器和控制器合称为中央处理器（Central Processing Processor，简称CPU）。<br><img src="https://img-blog.csdnimg.cn/9589dbb74b244c739d317e5ccebf6157.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;虽然经过了长期的发展，现代计算机系统占据主要地位的仍然是以存储程序和指令驱动执行为主要特点的冯·诺依曼结构。作为冯·诺依曼结构的一个变种，哈佛结构把程序和数据分开存储。控制器使用两条独立的总线读取程序和访问数据，程序空间和数据空间完成分开。在通用计算机领域，由于应用软件的多样性，要求计算机不断地变化所执行的程序内容，并且频繁地对数据与程序占用的存储器资源进行重新分配，使用统一编址可以最大限度地利用资源。但是在嵌入式应用中，系统要执行的任务相对单一，程序一般是固化在硬件里的，同时嵌入式系统对安全性、可靠性的要求更高，哈佛结构独立的程序空间更有利于代码保护。因此，在嵌入式领域，哈佛结构得到了广泛应用。需要指出的是，哈佛结构并没有改变冯·诺依曼结构存储程序和指令驱动执行的本质，它只是冯·诺依曼结构的一个变种，并不是独立于冯·诺依曼结构的一种新型结构。</p>
+<h4 id="nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-1-2-计算机的组成部件"><a href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-1-2-计算机的组成部件" class="headerlink" title="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.2 计算机的组成部件"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.2 计算机的组成部件</h4><p>​    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;按照冯·诺依曼结构，计算机包含五大部分，即运算器、控制器、存储器、输入设备和输出设备。</p>
+<ul>
+<li>运算器<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;运算器是计算机中负责计算（包括算术计算和逻辑计算等）的部件。运算器包括算术和逻辑<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;运算部件（Arithmetic Logic Units，简称 ALU）、移位部件、浮点运算部件（Floating Point Units，简称 FPU）、向量运算部件、寄存器等。</li>
+<li>控制器<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;​控制器是计算机中发出控制命令以控制计算机各部件自动、协调地工作的装置。控制器控制指令流和每条指令的执行，内含程序计数器和指令寄存器等。程序计数器存放当前执行指令的地址，指令寄存器存放当前正在执行的指令。<br>​    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;​由于控制器和运算器的紧密耦合关系，现代计算机通常把控制器和运算器集成在一起，称为中央处理器，即CPU。随着芯片集成度的不断提高，现代CPU除了含有运算器和控制器外，常常还集成了其他部件，比如高速缓存（Cache）部件、内存控制器等</li>
+<li>存储器<br>​    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;​存储器存储程序和数据，又称主存储器或内存，一般用动态随机访问存储器（Dynamic Random Access Memory，简称DRAM）实现。CPU可以直接访问它，IO设备也频繁地与它交换数据。存储器的存取速度往往满足不了 CPU 的快速要求，容量也满足不了应用的需要，为此将存储系统分为高速缓存（Cache)、主存储器和辅助存储器三个层次。Cache 存放当前 CPU 最频繁访问的部分主存储器内容，可以采用比 DRAM 速度快但容量小的静态随机访问存储器（Static Random Access Memory，简称 SRAM）实现。数据和指令在 Cache 和主存储器之间的调动由硬件自动完成。为扩大存储器容量， 使用磁盘、磁带、光盘等能存储大量数据的存储器作为辅助存储器。现代计算机中还有少量只读存储器（Read Only Memory，简称 ROM）用来存放引导程序和基本输入输出系统（Basic Input Output System，简称BIOS）等。现代计算机访问内存时采用虚拟地址，操作系统负责维护虚拟地址和物理地址转换的页表，集成在 CPU 中的存储管理部件（Memory Management Unit，简称 MMU）负责把虚拟地址转换为物理地址<br><img src="https://img-blog.csdnimg.cn/7b115650e2d54fe0abdd296b8a1e6971.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16"></li>
+<li>输入/输出设备<br>​    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;​输入/输出设备（简称IO设备）实现计算机与外部世界的信息交换。传统的IO设备有键盘、鼠标、打印机和显示器等；新型的 IO 设备能进行语音、图像、影视的输入、输出和手写体文字输入，并支持计算机之间通过网络进行通信。磁盘等辅助存储器在计算机中也当作 IO 设备来管理。</li>
+</ul>
+<h4 id="nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-​1-3-常见的CPU"><a href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-​1-3-常见的CPU" class="headerlink" title="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;​1.3 常见的CPU"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;​1.3 常见的CPU</h4><p>​    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;​&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;​CPU作为计算机硬件系统的核心，接下来我们就详细介绍一下CPU</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;​&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;​ 分类标准:指令集ISA</p>
+<p>​    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;​&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;​CPU 灵魂一一指令集架构 (lnstructio Set Architecture, ISA )。<br><img src="https://img-blog.csdnimg.cn/34d8ffa76f9d483286e2d811e3d5978b.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16"><br><img src="https://img-blog.csdnimg.cn/a2b4d7f54a654318b714be105f5453d5.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16"><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;​&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;领域之分：</p>
+<p><img src="https://img-blog.csdnimg.cn/89ab9edaf7a54b8ebfaf2e577b224ce9.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16"><br><font color="Red"><strong>详情参看:手把手教你设计CPU——RISC-V处理器篇第一章 和 <a target="_blank" rel="noopener" href="http://www.eepw.com.cn/zhuanlan/190396.html">http://www.eepw.com.cn/zhuanlan/190396.html</a></strong></font></p>
+<h3 id="2、计算机软件系统"><a href="#2、计算机软件系统" class="headerlink" title="2、计算机软件系统"></a>2、计算机软件系统</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;计算机的软件系统是指计算机在运行的各种程序、数据及相关的文档资料。计算机软件系统通常被分为<strong>系统软件</strong>和<strong>应用软件</strong>两大类。计算机系统软件能保证计算机按照用户的意愿正常运行，为满足用户使用计算机的各种需求，帮助用户管理计算机和维护资源执行用户命令、控制系统调度等任务。软件系统分为两大类，虽然各自的用途不同，但他们的共同点是都存储在<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%AD%98%E5%82%A8%E5%99%A8/786229">计算机存储器</a>中，以某种格式编码书写的程序或数据。</p>
+<h4 id="nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-1-系统软件"><a href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-1-系统软件" class="headerlink" title="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.1 系统软件"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.1 系统软件</h4><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;系统软件是指担负控制和协调计算机及其外部设备、支持应用软件的开发和运行的一类计算机软件。系统软件一般包括操作系统、语言处理程序、数据库系统和网络管理系统。</p>
+<h4 id="nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-2-应用软件"><a href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-2-应用软件" class="headerlink" title="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.2 应用软件"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.2 应用软件</h4><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;应用软件是指为特定领域开发、并为特定目的服务的一类软件。应用软件是直接面向用户需要的，它们可以直接帮助用户提高工作质量和效率，甚至可以帮助用户解决某些难题。应用软件一般分为两类:一类是为特定需要开发的实用型软件，如会计核算软件、订景系统、工程预算软件和教育辅助软件等:另一类是为了方便用户使用计算机而提供的一种工具软件，如用于文字处理的Word、用于辅助设计的AutoCAD及用于系统维护的瑞星<br>杀毒软件等。</p>
+<h2 id="三-软件系统开发语言"><a href="#三-软件系统开发语言" class="headerlink" title="三 软件系统开发语言"></a>三 软件系统开发语言</h2><h3 id="1、机器语言"><a href="#1、机器语言" class="headerlink" title="1、机器语言"></a>1、机器语言</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;电子计算机所使用的是由“0”和“1”组成的二进制数，二进制是计算机的语言的基础。计算机发明之初，人们只能降贵纡尊，用计算机的语言去命令计算机干这干那，一句话，就是写出一串串由“0”和“1”组成的指令序列交由计算机执行，这种语言，就是机器语言。使用机器语言是十分痛苦的，特别是在程序有错需要修改时，更是如此。而且，由于每台计算机的指令系统往往各不相同，所以，在一台计算机上执行的程序，要想在另一台计算机上执行，必须另编程序，造成了重复工作。但由于使用的是针对特定型号计算机的语言，故而运算效率是所有语言中最高的。机器语言，是第一代计算机语言。</p>
+<h3 id="2、汇编语言"><a href="#2、汇编语言" class="headerlink" title="2、汇编语言"></a>2、汇编语言</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;为了减轻使用机器语言编程的痛苦，人们进行了一种有益的改进：用一些简洁的英文字母、符号串来替代一个特定的指令的二进制串，比如，用“A D D”代表加法，“M O V”代表数据传递等等，这样一来，人们很容易读懂并理解程序在干什么，纠错及维护都变得方便了，这种程序设计语言就称为汇编语言，即第二代计算机语言。然而计算机是不认识这些符号的，这就需要一个专门的程序，专门负责将这些符号翻译成二进制数的机器语言，这种翻译程序被称为汇编程序。</p>
+<p>汇编语言同样十分依赖于机器硬件，移植性不好，但效率仍十分高，针对计算机特定硬件而编制的汇编语言程序，能准确发挥计算机硬件的功能和特长，程序精炼而质量高，所以至今仍是一种常用而强有力的软件开发工具。</p>
+<h3 id="3、高级语言"><a href="#3、高级语言" class="headerlink" title="3、高级语言"></a>3、高级语言</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;从最初与计算机交流的痛苦经历中，人们意识到，应该设计一种这样的语言，这种语言接近于数学语言或人的自然语言，同时又不依赖于计算机硬件，编出的程序能在所有机器上通用。经过努力，1 9 5 4年，第一个完全脱离机器硬件的高级语言—F O RT R A N问世了，4 0多年来，共有几百种高级语言出现，有重要意义的有几十种，影响较大、使用较普遍的有F O RT R A N、A L G O L、C O B O L、B A S I C、L I S P、S N O B O L、P L / 1、P a s c a l、<strong>C</strong>、P R O L O G、A d a<strong>、C + +<strong>、V C、V B、D e l p h i、</strong>J</strong> <strong>AVA</strong>、<strong>GO</strong> 等。</p>
+<ul>
+<li>​linux(c)–jvm(C++)-Java应用程序</li>
+<li>Nginx ：c语言</li>
+<li>redis：C语言</li>
+<li>mysql：C++语言开发的</li>
+<li>Tomcat：Java开发的</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB/" rel="tag"># 计算机体系</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/07/13/computer/computer2/" rel="prev" title="计算机操作系统（一）">
+      <i class="fa fa-chevron-left"></i> 计算机操作系统（一）
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/01/08/git/gitlab/" rel="next" title="gitlab 安装及汉化">
+      gitlab 安装及汉化 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E4%BB%80%E4%B9%88%E6%98%AF%E8%AE%A1%E7%AE%97%E6%9C%BA"><span class="nav-text">一、什么是计算机</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E4%BB%80%E4%B9%88%E6%98%AF%E8%AE%A1%E7%AE%97%E6%9C%BA"><span class="nav-text">1、什么是计算机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8F%91%E5%B1%95%E5%8E%86%E5%8F%B2"><span class="nav-text">2、计算机发展历史</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-1-%E8%AF%9E%E7%94%9F"><span class="nav-text">       2.1  诞生</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-2-%E5%8F%91%E5%B1%95"><span class="nav-text">       2.2  发展</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E7%BB%84%E6%88%90"><span class="nav-text">二、计算机系统组成</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A1%AC%E4%BB%B6%E7%B3%BB%E7%BB%9F"><span class="nav-text">1、计算机硬件系统</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-1-1-%E5%86%AF%C2%B7%E8%AF%BA%E4%BE%9D%E6%9B%BC%E7%BB%93%E6%9E%84%E4%B8%8E%E5%93%88%E4%BD%9B%E7%BB%93%E6%9E%84"><span class="nav-text">       1.1 冯·诺依曼结构与哈佛结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-1-2-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%9A%84%E7%BB%84%E6%88%90%E9%83%A8%E4%BB%B6"><span class="nav-text">       1.2 计算机的组成部件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-%E2%80%8B1-3-%E5%B8%B8%E8%A7%81%E7%9A%84CPU"><span class="nav-text">       ​1.3 常见的CPU</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%BD%AF%E4%BB%B6%E7%B3%BB%E7%BB%9F"><span class="nav-text">2、计算机软件系统</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-1-%E7%B3%BB%E7%BB%9F%E8%BD%AF%E4%BB%B6"><span class="nav-text">       2.1 系统软件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-2-%E5%BA%94%E7%94%A8%E8%BD%AF%E4%BB%B6"><span class="nav-text">       2.2 应用软件</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89-%E8%BD%AF%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80"><span class="nav-text">三 软件系统开发语言</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E6%9C%BA%E5%99%A8%E8%AF%AD%E8%A8%80"><span class="nav-text">1、机器语言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80"><span class="nav-text">2、汇编语言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E3%80%81%E9%AB%98%E7%BA%A7%E8%AF%AD%E8%A8%80"><span class="nav-text">3、高级语言</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Wi Gang"
+      src="/images/WechatIMG22.jpg">
+  <p class="site-author-name" itemprop="name">Wi Gang</p>
+  <div class="site-description" itemprop="description">这个人没有简介哎😮‍💨😮‍💨😮‍💨😮‍💨</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/wi-gang" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;wi-gang" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_42217906" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_42217906" rel="noopener" target="_blank"><i class="book fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Wi Gang</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+<script>
+  (function() {
+    function leancloudSelector(url) {
+      url = encodeURI(url);
+      return document.getElementById(url).querySelector('.leancloud-visitors-count');
+    }
+
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = decodeURI(visitors.id);
+      var title = visitors.dataset.flagTitle;
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            leancloudSelector(url).innerText = counter.time + 1;
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .catch(error => {
+                console.error('Failed to save visitor count', error);
+              });
+          } else {
+              leancloudSelector(url).innerText = 'Counter not initialized! More info at console err msg.';
+              console.error('ATTENTION! LeanCloud counter has security bug, see how to solve it here: https://github.com/theme-next/hexo-leancloud-counter-security. \n However, you can still use LeanCloud without security, by setting `security` option to `false`.');
+            
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return decodeURI(element.id);
+      });
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url: { '$in': entries } })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          for (let url of entries) {
+            let target = results.find(item => item.url === url);
+            leancloudSelector(url).innerText = target ? target.time : 0;
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    let { app_id, app_key, server_url } = {"enable":true,"app_id":"aGKOLEbOYGdHOagFQ9qszitR-gzGzoHsz","app_key":"iqraOa6xtVIhbLws3tuaFaPP","server_url":null,"security":true};
+    function fetchData(api_server) {
+      var Counter = (method, url, data) => {
+        return fetch(`${api_server}/1.1${url}`, {
+          method,
+          headers: {
+            'X-LC-Id'     : app_id,
+            'X-LC-Key'    : app_key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        if (CONFIG.hostname !== location.hostname) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    }
+
+    let api_server = app_id.slice(-9) !== '-MdYXbMMI' ? server_url : `https://${app_id.slice(0, 8).toLowerCase()}.api.lncldglobal.com`;
+
+    if (api_server) {
+      fetchData(api_server);
+    } else {
+      fetch('https://app-router.leancloud.cn/2/route?appId=' + app_id)
+        .then(response => response.json())
+        .then(({ api_server }) => {
+          fetchData('https://' + api_server);
+        });
+    }
+  })();
+</script>
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

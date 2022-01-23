@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="一、操作系统的运行机制和体系结构1、运行机制&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;1.1 两种指令 &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;1.2 两种处理器状态">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算机操作系统（二）">
+<meta property="og:url" content="http://example.com/2021/01/01/computer/computer3/index.html">
+<meta property="og:site_name" content="Wi Gang">
+<meta property="og:description" content="一、操作系统的运行机制和体系结构1、运行机制&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;1.1 两种指令 &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;1.2 两种处理器状态">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/1da0ec8843164e0ebb447b8ad4e21847.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/beb5aacdf7634274bad41e978b1d9eb6.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/1747ddb42d2f483db13bc6a5ad06dbe3.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/1c2041e2998f4e72a2d6555941530aeb.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/f7ba242be42646c1a6d894a0029eec85.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/86e2760632e24dabaebf05f9c5879985.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/da8435d08746473ca106aab1b707ba93.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/451422eafeaa4e7ebd69c5d96d37959a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/1196b1c6cd72448ba760504ea3d9d4fa.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="article:published_time" content="2020-12-31T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-01-23T14:14:15.990Z">
+<meta property="article:author" content="Wi Gang">
+<meta property="article:tag" content="计算机体系">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/1da0ec8843164e0ebb447b8ad4e21847.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16">
+
+<link rel="canonical" href="http://example.com/2021/01/01/computer/computer3/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>计算机操作系统（二） | Wi Gang</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Wi Gang</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">哟，又在偷偷写bug了！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/01/01/computer/computer3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/WechatIMG22.jpg">
+      <meta itemprop="name" content="Wi Gang">
+      <meta itemprop="description" content="这个人没有简介哎😮‍💨😮‍💨😮‍💨😮‍💨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Wi Gang">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          计算机操作系统（二）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-01-01 00:00:00" itemprop="dateCreated datePublished" datetime="2021-01-01T00:00:00+08:00">2021-01-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-01-23 22:14:15" itemprop="dateModified" datetime="2022-01-23T22:14:15+08:00">2022-01-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB/" itemprop="url" rel="index"><span itemprop="name">计算机体系</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2021/01/01/computer/computer3/" class="post-meta-item leancloud_visitors" data-flag-title="计算机操作系统（二）" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="一、操作系统的运行机制和体系结构"><a href="#一、操作系统的运行机制和体系结构" class="headerlink" title="一、操作系统的运行机制和体系结构"></a>一、操作系统的运行机制和体系结构</h2><h3 id="1、运行机制"><a href="#1、运行机制" class="headerlink" title="1、运行机制"></a>1、运行机制</h3><h4 id="nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-1-1-两种指令"><a href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-1-1-两种指令" class="headerlink" title="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1 两种指令"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1 两种指令</h4><p><img src="https://img-blog.csdnimg.cn/1da0ec8843164e0ebb447b8ad4e21847.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<h4 id="nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-1-2-两种处理器状态"><a href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-1-2-两种处理器状态" class="headerlink" title="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.2 两种处理器状态"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.2 两种处理器状态</h4><span id="more"></span>
+<p><img src="https://img-blog.csdnimg.cn/beb5aacdf7634274bad41e978b1d9eb6.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<h4 id="nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-1-3-两种程序"><a href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-1-3-两种程序" class="headerlink" title="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.3  两种程序"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.3  两种程序</h4><p><img src="https://img-blog.csdnimg.cn/1747ddb42d2f483db13bc6a5ad06dbe3.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<h4 id="nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-1-4-小结"><a href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-1-4-小结" class="headerlink" title="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.4 小结"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.4 小结</h4><ul>
+<li>特权指令只能在CPU处于核心态下执行，非特权指令既可以在核心态下执行，也可以在用户态下执行。</li>
+<li>需要使用特权指令的程序称为内核程序，普通的程序为应用程序。</li>
+<li>内核程序由于需要使用特权指令，所以需要运行在核心态。</li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/1c2041e2998f4e72a2d6555941530aeb.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<h3 id="2、OS体系结构"><a href="#2、OS体系结构" class="headerlink" title="2、OS体系结构"></a>2、OS体系结构</h3><p>​    既然操作系统中的两种程序分为内核程序和应用程序，那么那些功能需要内核程序来实现。我们先来看一下OS的体系结构</p>
+<p><img src="https://img-blog.csdnimg.cn/f7ba242be42646c1a6d894a0029eec85.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<p><img src="https://img-blog.csdnimg.cn/86e2760632e24dabaebf05f9c5879985.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<p><font color="Red"><strong>举例子说明</strong></font><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;操作系统的体系结构问题与企业的管理问题很相似。内核就是企业的管理层，负责一些重要的工作。只有管理层才能执行特权指令，普通员工只能执行非特权指令。用户态、核心态之间的切换相当于普通员工和管理层之间的工作交接</p>
+<ul>
+<li>大内核:企业初创时体量不大，管理层的人会负责大部分的事情。优点是效率高;缺点是组织结构混乱，难以维护。</li>
+<li>微内核:随着企业体量越来越大，管理层只负责最核心的一些工作。优点是组织结构清晰，方便维护;缺点是效率低。</li>
+</ul>
+<h2 id="二、操作系统接口"><a href="#二、操作系统接口" class="headerlink" title="二、操作系统接口"></a>二、操作系统接口</h2><p>​    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;操作系统作为计算机系统资源的管理者，对系统中的所有硬件和软件资源进行统一一的管理和操纵。无论是用户(程序)或OS的外层软件，凡是涉及到系统资源的有关操作，都必须作为服务请求提交给OS，由它来完成。为了使用户能方便地使用计算机，操作系统提供了相应的用户接口，帮助用户快速、有效、安全、可靠地操纵计算机系统中的各类资源,完成相关的处理。一般地，操作系统向用户提供了两类接口，即<strong>用户接口和程序接口</strong>。值得说明的是，在Internet 广为流行的今天，OS又增加了一种面向网络的<strong>网络用户接口</strong>。</p>
+<h3 id="1、用户接口"><a href="#1、用户接口" class="headerlink" title="1、用户接口"></a>1、用户接口</h3><p>​    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在当今几乎所有的OS中，都向用户提供了用户接口，允许用户在终端上键入命令，或向OS提交作业书来取得OS的服务，并控制自己程序的运行。一般地，用户接口又可进一步分为三种类型:<strong>字符显示式联机用户接口、图形化联机用户接口</strong>和脱机用户接口。接下来我们主要看一下字符显示式联机用户接口、图形化联机用户接口。</p>
+<h4 id="nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-1-1-字符显示式联机用户接口-就是命令"><a href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-1-1-字符显示式联机用户接口-就是命令" class="headerlink" title="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1 字符显示式联机用户接口-就是命令"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1 字符显示式联机用户接口-就是命令</h4><p>​    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;字符显示式联机用户接口又称为联机命令接口，是指用户通过命令语言实现对作业的<br>控制，以及取得操作系统的服务。即用户在实现与机器的交互时，先在终端的键盘上键入<br>所需的命令，由终端处理程序接收该命令，并在用户终端屏幕上以字符显示方式反馈用户<br>输入的命令信息、命令执行及执行结果信息。<br><font color="green">windows cmd.exe 、linux shell命令</font><br>​</p>
+<h4 id="nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-1-2-图形化联机用户接口-就是图形界面"><a href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-1-2-图形化联机用户接口-就是图形界面" class="headerlink" title="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.2 图形化联机用户接口-就是图形界面"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.2 图形化联机用户接口-就是图形界面</h4><p>​    以Microsoft公司的Windows操作系统为例，在系统初始化后，OS为终端用户生成了一个运行explorer.exe的进程，它运行一个具有窗口界面的命令解释程序，该窗口是一个特殊的窗口，即桌面。在“开始”菜单中罗列了系统的各种应用程序，点击某个程序，则解释程序会产生一个新进程，由新进程弹出一个新窗口，并运行该应用程序，该新窗口的菜单栏或图标栏会显示应用程序的子命令。用户可进一-步选择并点击子命令， 如果该子命令需要用户输入参数，则会弹出一个对话窗口，指导用户进行命令参数的输入，完成后用户<br>点击“确定”按钮，命令进入执行处理过程。</p>
+<h3 id="2、程序接口-系统调用"><a href="#2、程序接口-系统调用" class="headerlink" title="2、程序接口-系统调用"></a>2、程序接口-系统调用</h3><p>​    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;程序接口，是OS专门为用户程序设置的，提供给程序员在编程时使用，也是用户程序取得os服务的唯一途径。 它是由-组系统调用(system call)组成，因而，也可以说，系统调用提供了用户程序和操作系统内核之间的接口。系统调用不仅可供所有的应用程序使<br>用，而且也可供OS自身使用。在每个系统中，通常都有几十条甚至上百条的系统调用，并可根据其功能把它们划分成若干类,每一个系统调用都是-一个能完成特定功能的子程序。</p>
+<h4 id="nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-1-系统调用的基本概念"><a href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-1-系统调用的基本概念" class="headerlink" title="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.1 系统调用的基本概念"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.1 系统调用的基本概念</h4><p>​    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在计算机系统中，通常运行着两类程序:系统程序和应用程序。为了防止应用程序对OS的破坏，应用程序和OS的内核是运行在不同的状态，即OS的内核是运行在系统态，而应用程序是运行在用户态。</p>
+<p><img src="https://img-blog.csdnimg.cn/da8435d08746473ca106aab1b707ba93.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<ol>
+<li><p>系统态（内核态）和用户态</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在计算机系统中设置了两种状态:系统态(或称为核心态)和用户态。在实际运行过程中，处理机会在系统态和用户态间切换。相应地，现代多数OS将CPU的指令集分为特权指令和非特权指令两类。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(1)  &nbsp;特权指令。特权指令是指在系统态运行的指令，它对内存空间的访问范围基本不受限制，不仅能访问用户空间，也能访问系统空间。如启动外部设备、设置系统时钟时间、关中断、转换执行状态等。特权指令只允许OS使用，不允许应用程序使用,以避免引起系统混乱。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(2)  &nbsp;非特权指令。非特权指令是在用户态运行的指令。应用程序所使用的都是非特权指令，它只能完成一般性的操作和任务，不能对系统中的硬件和软件直接进行访问，对内存的访问范围也局限于用户空间。这样，可以防止应用程序的运行异常对系统造成破坏。这种限制是由硬件实现的，如果在应用程序中使用了特权指令，就会发出权限出错信号，操作系统捕获到这个信号后，将转入相应的错误处理程序，将停止该应用程序的运行，重新调度。</p>
+</li>
+<li><p>系统调用</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在OS中提供系统调用的目的，是使应用程序可以通过它间接调用OS中的相关过程,取得相应的服务。系统调用在本质上是应用程序请求OS内核完成某功能时的一种过程调用，但它是一种特殊的过程调用，它与一般的过程调用有下述几方面的明显差别:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(1)  &nbsp;运行在不同的系统状态。一般的过程调用其调用程序和被调用程序运行在相同的状态一系统态或用户 态;而系统调用与一般调用的最大区别就在于:调用程序是运行在用户态，而被调用程序是运行在系统态。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(2)  &nbsp;状态的转换。由于一般的过程调用并不涉及到系统状态的转换，所以可直接由调用过程转向被调用过程。但在运行系统调用时，由于调用和被调用过程是工作在不同的系统状态，因而不允许由调用过程直接转向被调用过程，需要通过<strong>软中断机制</strong>，先由用户态转换为系统态，经内核分析后，才能转向相应的系统调用处理子程序。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(3)  &nbsp;返回问题。在采用了抢占式(剥夺)调度方式的系统中，在被调用过程执行完后，要对系统中所有要求运行的进程做优先权分析。当调用进程仍具有最高优先级时，才返回到调用进程继续执行;否则，将引起重新调度，以便让优先权最高的进程优先执行。此时，将把调用进程放入就绪队列。</p>
+</li>
+</ol>
+<h4 id="nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-2-系统调用的标准"><a href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-2-系统调用的标准" class="headerlink" title="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.2 系统调用的标准"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.2 系统调用的标准</h4><p>​    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;最开始许多操作系统都提供了系统调用是有差异的，但是提供的的各种类型的系统调用，实现的功能也相类似，但在实现的细节和形式方面却相差很大，这种差异给实现应用程序与操作系统平台的无关性带来了很大的困难。为解决这一问题，国际标准化组织ISO给出的有关系统调用的国际标准POSIX 1003. 1(Portable Operating System IX)，也称为“基于UNIX的可移植操作系统接口”。POSIX定义了标准应用程序接口(API),用于保证编制的应用程序可以在源代码一级上在多种操作系统上移植运行。只有符合这一标准的应用程序，才有可能完全兼容多种操作系统，即在多种操作系统下都能够运行。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;POSIX标准定义了- -组过程，这组过程是构造系统调用所必须的，通过调用这些过程所提供的服务，确定了一系列系统调用的功能。一般而言，在POSIX标准中，大多数的系统调用是一个系统调用直接映射一个过程，但也有-一个系统调用对应若千个过程的情形，如当一个系统调用所需要的过程是其它系统调用的组合或变形时，则往往会对应多个过程。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;需要明确的是，POSIX标准所定义的一组过程虽然指定了系统调用的功能，但并没有明确规定系统调用以什么形式实现，是库函数还是其它形式。如早期操作系统的系统调用.使用汇编语言编写，这时的系统调用可看成扩展的机器指令，因而，能在汇编语言编程中<br>直接使用。而在一些高级语言或C语言中，尤其是最新推出的一些操作系统， 如UNIX新版本、Linux. Windows和OS/2等，其系统调用干脆用C语言编写,并以库函数形式提供，所以在用C语言编制的应用程序中，可直接通过使用对应的库函数来使用系统调用，库函数的目的是隐藏访管指令的细节，使系统调用更像过程调用。但一般地说，库函数属于用户程序而非系统调用程序。如下图示出了UNIX/Linux的系统程序、库函数、系统调用的层次关系。</p>
+<p><img src="https://img-blog.csdnimg.cn/451422eafeaa4e7ebd69c5d96d37959a.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<h4 id="nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-3-系统调用的类型"><a href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-3-系统调用的类型" class="headerlink" title="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.3 系统调用的类型"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.3 系统调用的类型</h4><p>​    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;现在所有的通用OS都提供了许多系统调用，但它们所提供的系统调用会有一定的差异。对于一般通用的OS而言，可将系统调用分为如下三大类。</p>
+<ol>
+<li><p>进程控制类系统调用<br>​    主要用于对进程控制的系统调用有:<br>&nbsp;&nbsp;(1)  &nbsp;创建和终止进程的系统调用。利用创建进程的系统调用，为欲参加并发执行的程序创建一-个进程。 当进程已经执行结束时，利用终止进程的系统调用来终止该进程的运行。<br>​&nbsp;&nbsp;(2)  &nbsp;获得和设置进程属性的系统调用。进程的属性包括有进程标识符、进程优先级、最大允许执行时间等。利用获得进程属性的系统调用来了解某进程的属性，利用设置进程属性的系统调用来确定和重新设置进程的属性。<br>&nbsp;&nbsp;(3)  &nbsp;等待某事件出现的系统调用。进程在运行过程中，需要等待某事件(条件)出现后方可继续执行。此时进程可利用等待(事件)的系统调用，使自己处于等待状态，一旦等待的事件出现，便可将等待进程唤醒。</p>
+</li>
+<li><p>文件操纵类系统调用<br>对文件进行操纵的主要系统调用如下:<br>&nbsp;&nbsp;(1)  &nbsp;创建和删除文件。利用创建文件的系统调用请求系统创建一-个新文件。利用删除文件的系统调用将指名文件删除。<br>&nbsp;&nbsp;(2)  &nbsp;打开和关闭文件的系统调用。用户在第一次访问某个文件之前，应先利用打开文件的系统调用将指名文件打开。利用关闭文件的系统调用将指定文件关闭。<br>&nbsp;&nbsp;(3)  &nbsp;读和写文件的系统调用。用户可利用读系统调用从已打开的文件中读出给定数目的字符，并送至指定的缓冲区中;也可利用写系统调用从指定的缓冲区中将给定数目的字符写入文件中。读和写系统调用是文件操纵类中使用最频繁的系统调用。</p>
+</li>
+<li><p>进程通信类系统调用<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在单处理机系统中，OS经常采用消息传递方式和共享存储区方式。当采用消息传递方式时，在通信前需先打开一个连接。为此，应由源进程发出一条打开连接的系统调用，而目标进程则应利用接受连接的系统调用表示同意进行通信;然后，在源和目标进程之间便可开始通信。可以利用发送消息的系统调用或者用接收消息的系统调用来交换信息。通信、结束后，还须再利用关闭连接的系统调用结束通信。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;用户在利用共享存储区进行通信之前，须先利用建立共享存储区的系统调用来建立一个共享存储区，再利用建立连接的系统调用将该共享存储区连接到进程自身的虚地址空间上，然后便可利用读和写共享存储区的系统调用实现相互通信。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;除上述三类系统调用外，常用的系统调用还包括设备管理类系统调用和信息维护类系统调用，前者主要用于实现申请设备、释放设备、设备I/O和重定向、获得和设置设备属性等功能，后者主要用来获得包括有关系统和文件的时间、日期信息、操作系统版本、当前用户以及有关空闲内存和磁盘空间大小等多方面的信息。</p>
+</li>
+</ol>
+<h3 id="3、系统调用的实现原理"><a href="#3、系统调用的实现原理" class="headerlink" title="3、系统调用的实现原理"></a>3、系统调用的实现原理</h3><p>​    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;系统调用是通过中断机制实现的，并且一个操作系统的所有系统调用，都通过同一个<strong>中断入口</strong>来实现。如MS DOS提供了INT 21H,应用程序通过该中断获取操作系统的服务。对于拥有保护机制的OS来说，中断机制本身也是受保护的，在IBM PC. 上，Intel 提供了多达255个中断号，但只有授权给应用程序保护等级的中断号，才是可以被应用程序调用的。对于未被授权的中断号，如果应用程序进行调用，同样会引起保护异常，而导致自己被操作系统停止。如Linux仅仅给应用程序授权了4个中断号: 3, 4, 5, 以及80h。前三个中断号是提供给应用程序调试所使用的，而80h正是系统调用(system cll)的中断号。<br><font color="Red"><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/643cac5f5f02">https://www.jianshu.com/p/643cac5f5f02</a></font></p>
+<p><img src="https://img-blog.csdnimg.cn/1196b1c6cd72448ba760504ea3d9d4fa.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16"></p>
+<h2 id="三、进程与线程"><a href="#三、进程与线程" class="headerlink" title="三、进程与线程"></a>三、进程与线程</h2><h3 id="1、基本概念"><a href="#1、基本概念" class="headerlink" title="1、基本概念"></a>1、基本概念</h3><p>​    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在早期未配置OS的系统和单道批处理系统中，程序的执行方式是顺序执行，即在内存中仅装入一道用户程序，由它独占系统中的所有资源，只有在一一个用户程序执行完成后，才允许装入另一个程序并执行。可见，这种方式浪费资源、系统运行效率低等缺点。而在多道程序系统中，由于内存中可以同时装入多个程序，使它们共享系统资源，并发执行，显然可以克服上述缺点。程序的这两种执行方式间有着显著的不同，尤其是考虑到程序并发执行时的特征，才导致了在操作系统中引入进程的概念。 <strong>多个进程同时跑</strong></p>
+<p>​    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在20世纪60年代中期，人们在设计多道程序OS时，引入了进程的概念，从而解决了在单处理机环境下的程序并发执行问题。此后在长达20年的时间里，在多道程序OS中一直是以进程作为能拥有资源和独立调度(运行)的基本单位的。直到80年代中期，人们又提出了比进程更小的基本单位线 程的概念，试图用它来提高程序并发执行的程度，以进一步改善系统的服务质量。特别是在进入20世纪90年代后，多处理机系统得到迅速发展，由于线程能更好地提高程序的并行执行程度，因而近几年推出的多处理机OS无一例外地都引入了线程，用以改善OS的性能。<strong>一个进程多段代码同时跑</strong></p>
+<p><font color="Red"><strong>进程是资源分配的最小单位，线程是资料分配的最小单位</strong></font></p>
+<h3 id="2、线程的实现方式"><a href="#2、线程的实现方式" class="headerlink" title="2、线程的实现方式"></a>2、线程的实现方式</h3><p>​    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;线程已在许多系统中实现，但各系统的实现方式并不完全相同。在有的系统中，特别是一些数据库管理系统，如infomix所实现的是<strong>用户级线程</strong>;而另第一些系统(如Macintosh和OS/2操作系统)所实现的是<strong>内核支持线程</strong>;还有一些系统如Solaris 操作系统，则同时实现了这<strong>两种类型的线程。</strong></p>
+<h4 id="nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-1-内核支持线程KST-Kernel-Supported-Threads"><a href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-1-内核支持线程KST-Kernel-Supported-Threads" class="headerlink" title="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.1 内核支持线程KST(Kernel Supported Threads)"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.1 内核支持线程KST(Kernel Supported Threads)</h4><p>​    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在OS中的所有进程，无论是系统进程还是用户进程，都是在操作系统内核的支持下运行的，是与内核紧密相关的。而内核支持线程KST同样也是在内核的支持下运行的，它们的创建、阻塞、撤消和切换等，也都是在内核空间实现的。为了对内核线程进行控制和管理，在内核空间也为每-一个内核线程设置了一个线程控制块，内核根据该控制块而感知某线程的存在，并对其加以控制。当前大多数OS都支持内核支持线程。这种线程实现方式主要有四个主要优点:<br>&nbsp;&nbsp;(1)  &nbsp;在多处理器系统中，内核能够同时调度同一进程中的多个线程并行执行;<br>​&nbsp;&nbsp;(2)  &nbsp;如果进程中的一个线程被阻塞了，内核可以调度该进程中的其它线程占有处理器运行，也可以运行其它进程中的线程;<br>&nbsp;&nbsp;(3)  &nbsp;内核支持线程具有很小的数据结构和堆栈，线程的切换比较快，切换开销小;<br>&nbsp;&nbsp;(4)  &nbsp;内核本身也可以采用多线程技术，可以提高系统的执行速度和效率。内核支持线程的主要缺点是:对于用户的线程切换而言，其模式切换的开销较大，在同一个进程中，从一个线程切换到另一个线程时，需要从用户态转到核心态进行，这是因为用户进程的线程在用户态运行，而线程调度和管理是在内核实现的，系统开销较大。</p>
+<h4 id="nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-2-用户级线程ULT-User-Level-Threads"><a href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-2-用户级线程ULT-User-Level-Threads" class="headerlink" title="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.2 用户级线程ULT(User Level Threads)"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.2 用户级线程ULT(User Level Threads)</h4><p>​    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;用户级线程是在用户空间中实现的。对线程的创建、撤消、 同步与通信等功能，都无需内核的支持，即用户级线程是与内核无关的。在一个系统中的用户级线程的数目可以达到数百个至数千个。由于这些线程的任务控制块都是设置在用户空间，而线程所执行的操作也无需内核的帮助，因而内核完全不知道用户级线程的存在。</p>
+<p><font color="Red">使用用户级线程方式有许多优点:</font><br>&nbsp;&nbsp;(1)  &nbsp;线程切换不需要转换到内核空间。对一个进程而言，其所有线程的管理数据结构均在该进程的用户空间中，管理线程切换的线程库也在用户地址空间运行，因此进程不必切换到内核方式来做线程管理，从而节省了模式切换的开销。<br>&nbsp;&nbsp;(2)  &nbsp;调度算法可以是进程专用的。在不干扰OS调度的情况下，不同的进程可以根据自身需要选择不同的调度算法，对自己的线程进行管理和调度，而与OS的低级调度算法是无关的。<br>&nbsp;&nbsp;(3)  &nbsp;用户级线程的实现与OS平台无关，因为对于线程管理的代码是属于用户程序的一-部分，所有的应用程序都可以对之进行共享。因此，用户级线程甚至可以在不支持线程机制的操作系统平台上实现。</p>
+<p><font color="Red">而用户级线程方式的主要缺点则在于:</font><br>&nbsp;&nbsp;(1)  &nbsp;系统调用的阻塞问题。在基于进程机制的OS中，大多数系统调用将使进程阻塞，因此，当线程执行一个系统调用时，不仅该线程被阻塞，而且，进程内的所有线程会被阻塞。而在内核支持线程方式中，则进程中的其它线程仍然可以运行。<br>&nbsp;&nbsp;(2)  &nbsp;在单纯的用户级线程实现方式中，多线程应用不能利用多处理机进行多重处理的优点，内核每次分配给一个进程的仅一个CPU，因此，进程中仅有一个线程能执行，在该线程放弃CPU之前，其它线程只能等待。</p>
+<h4 id="nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-3-组合模式"><a href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-3-组合模式" class="headerlink" title="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.3 组合模式"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.3 组合模式</h4><p>​    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;有些OS把用户级线程和内核支持线程两种方式进行组合，提供了组合方式ULT/KST线程。在组合方式线程系统中，内核支持多个内核支持线程的建立、调度和管理，同时，也允许用户应用程序建立、调度和管理用户级线程。一些内核支持线程对应多个用户级线程，这是用户级线程通过时分多路复用内核支持线程来实现的。即将用户级线程对部分或全部内核支持线程进行多路复用，程序员可按应用需要和机器配置，对内核支持线程数目进行调整，以达到较好效果。组合方式线程中，同一个进程内的多个线程可以同时在多处理器上并行执行，而且在阻塞一个线程时并不需要将整个进程阻塞。所以，组合方式多线程机制能够结合KST和ULT两者的优点，并克服了其各自的不足。由于用户级线程和内核支持线程。</p>
+<p>注意：linux同时支持内核线程和用户线程，但是jvm封装的线程是内核线程，但是jvm有最新计划实现用户线程。</p>
+<p>详细参见：深入理解Java虚拟机：JVM高级特性与最佳实践（第3版） 周志明  12.4.1</p>
+<p>记住：现在的jvm中，创建线程和释放线程都要调用linux的内核指令，就是要进行用户态与内核态之间的切换。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB/" rel="tag"># 计算机体系</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/07/13/hello-world/" rel="prev" title="Hello World">
+      <i class="fa fa-chevron-left"></i> Hello World
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/07/13/computer/computer2/" rel="next" title="计算机操作系统（一）">
+      计算机操作系统（一） <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9A%84%E8%BF%90%E8%A1%8C%E6%9C%BA%E5%88%B6%E5%92%8C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84"><span class="nav-text">一、操作系统的运行机制和体系结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E8%BF%90%E8%A1%8C%E6%9C%BA%E5%88%B6"><span class="nav-text">1、运行机制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-1-1-%E4%B8%A4%E7%A7%8D%E6%8C%87%E4%BB%A4"><span class="nav-text">       1.1 两种指令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-1-2-%E4%B8%A4%E7%A7%8D%E5%A4%84%E7%90%86%E5%99%A8%E7%8A%B6%E6%80%81"><span class="nav-text">       1.2 两种处理器状态</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-1-3-%E4%B8%A4%E7%A7%8D%E7%A8%8B%E5%BA%8F"><span class="nav-text">       1.3  两种程序</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-1-4-%E5%B0%8F%E7%BB%93"><span class="nav-text">       1.4 小结</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81OS%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84"><span class="nav-text">2、OS体系结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E6%8E%A5%E5%8F%A3"><span class="nav-text">二、操作系统接口</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E7%94%A8%E6%88%B7%E6%8E%A5%E5%8F%A3"><span class="nav-text">1、用户接口</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-1-1-%E5%AD%97%E7%AC%A6%E6%98%BE%E7%A4%BA%E5%BC%8F%E8%81%94%E6%9C%BA%E7%94%A8%E6%88%B7%E6%8E%A5%E5%8F%A3-%E5%B0%B1%E6%98%AF%E5%91%BD%E4%BB%A4"><span class="nav-text">       1.1 字符显示式联机用户接口-就是命令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-1-2-%E5%9B%BE%E5%BD%A2%E5%8C%96%E8%81%94%E6%9C%BA%E7%94%A8%E6%88%B7%E6%8E%A5%E5%8F%A3-%E5%B0%B1%E6%98%AF%E5%9B%BE%E5%BD%A2%E7%95%8C%E9%9D%A2"><span class="nav-text">       1.2 图形化联机用户接口-就是图形界面</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E7%A8%8B%E5%BA%8F%E6%8E%A5%E5%8F%A3-%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8"><span class="nav-text">2、程序接口-系统调用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-1-%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-text">       2.1 系统调用的基本概念</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-2-%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E7%9A%84%E6%A0%87%E5%87%86"><span class="nav-text">       2.2 系统调用的标准</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-3-%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E7%9A%84%E7%B1%BB%E5%9E%8B"><span class="nav-text">       2.3 系统调用的类型</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E3%80%81%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="nav-text">3、系统调用的实现原理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E8%BF%9B%E7%A8%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B"><span class="nav-text">三、进程与线程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-text">1、基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F"><span class="nav-text">2、线程的实现方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-1-%E5%86%85%E6%A0%B8%E6%94%AF%E6%8C%81%E7%BA%BF%E7%A8%8BKST-Kernel-Supported-Threads"><span class="nav-text">       2.1 内核支持线程KST(Kernel Supported Threads)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-2-%E7%94%A8%E6%88%B7%E7%BA%A7%E7%BA%BF%E7%A8%8BULT-User-Level-Threads"><span class="nav-text">       2.2 用户级线程ULT(User Level Threads)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-nbsp-2-3-%E7%BB%84%E5%90%88%E6%A8%A1%E5%BC%8F"><span class="nav-text">       2.3 组合模式</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Wi Gang"
+      src="/images/WechatIMG22.jpg">
+  <p class="site-author-name" itemprop="name">Wi Gang</p>
+  <div class="site-description" itemprop="description">这个人没有简介哎😮‍💨😮‍💨😮‍💨😮‍💨</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/wi-gang" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;wi-gang" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_42217906" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_42217906" rel="noopener" target="_blank"><i class="book fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Wi Gang</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+<script>
+  (function() {
+    function leancloudSelector(url) {
+      url = encodeURI(url);
+      return document.getElementById(url).querySelector('.leancloud-visitors-count');
+    }
+
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = decodeURI(visitors.id);
+      var title = visitors.dataset.flagTitle;
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            leancloudSelector(url).innerText = counter.time + 1;
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .catch(error => {
+                console.error('Failed to save visitor count', error);
+              });
+          } else {
+              leancloudSelector(url).innerText = 'Counter not initialized! More info at console err msg.';
+              console.error('ATTENTION! LeanCloud counter has security bug, see how to solve it here: https://github.com/theme-next/hexo-leancloud-counter-security. \n However, you can still use LeanCloud without security, by setting `security` option to `false`.');
+            
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return decodeURI(element.id);
+      });
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url: { '$in': entries } })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          for (let url of entries) {
+            let target = results.find(item => item.url === url);
+            leancloudSelector(url).innerText = target ? target.time : 0;
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    let { app_id, app_key, server_url } = {"enable":true,"app_id":"aGKOLEbOYGdHOagFQ9qszitR-gzGzoHsz","app_key":"iqraOa6xtVIhbLws3tuaFaPP","server_url":null,"security":true};
+    function fetchData(api_server) {
+      var Counter = (method, url, data) => {
+        return fetch(`${api_server}/1.1${url}`, {
+          method,
+          headers: {
+            'X-LC-Id'     : app_id,
+            'X-LC-Key'    : app_key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        if (CONFIG.hostname !== location.hostname) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    }
+
+    let api_server = app_id.slice(-9) !== '-MdYXbMMI' ? server_url : `https://${app_id.slice(0, 8).toLowerCase()}.api.lncldglobal.com`;
+
+    if (api_server) {
+      fetchData(api_server);
+    } else {
+      fetch('https://app-router.leancloud.cn/2/route?appId=' + app_id)
+        .then(response => response.json())
+        .then(({ api_server }) => {
+          fetchData('https://' + api_server);
+        });
+    }
+  })();
+</script>
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

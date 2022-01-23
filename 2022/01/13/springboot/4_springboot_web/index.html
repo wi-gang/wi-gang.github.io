@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="返回 JSON 数据1.1 默认实现&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;JSON 是目前主流的前后端数据传输方式， Spring MVC 中使用消息转换器 HttpMessageConverter 对 JSON 的转换提供了很好的支持，在 Spring Boot 更进 ，对相关配置做了更进一步的简化。默认情况下，当开发者新创建一个 Spring Bo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="四、Spring Boot 整合 Web 开发">
+<meta property="og:url" content="http://example.com/2022/01/13/springboot/4_springboot_web/index.html">
+<meta property="og:site_name" content="Wi Gang">
+<meta property="og:description" content="返回 JSON 数据1.1 默认实现&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;JSON 是目前主流的前后端数据传输方式， Spring MVC 中使用消息转换器 HttpMessageConverter 对 JSON 的转换提供了很好的支持，在 Spring Boot 更进 ，对相关配置做了更进一步的简化。默认情况下，当开发者新创建一个 Spring Bo">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/efdeb312c444403c92e1e966bb94dc35.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/247e6e842dd843c2a0e9b5bfdbc49b4b.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/3d5fd1a9fcbc495d861f4b29279ce106.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/69dd8f5f24e34a30838c0bc23a17bbe5.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/69dd8f5f24e34a30838c0bc23a17bbe5.png">
+<meta property="article:published_time" content="2022-01-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-01-13T03:32:01.373Z">
+<meta property="article:author" content="Wi Gang">
+<meta property="article:tag" content="Springboot">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/efdeb312c444403c92e1e966bb94dc35.png">
+
+<link rel="canonical" href="http://example.com/2022/01/13/springboot/4_springboot_web/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>四、Spring Boot 整合 Web 开发 | Wi Gang</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Wi Gang</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">哟，又在偷偷写bug了！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/01/13/springboot/4_springboot_web/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/WechatIMG22.jpg">
+      <meta itemprop="name" content="Wi Gang">
+      <meta itemprop="description" content="这个人没有简介哎😮‍💨😮‍💨😮‍💨😮‍💨">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Wi Gang">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          四、Spring Boot 整合 Web 开发
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-01-13 00:00:00 / 修改时间：11:32:01" itemprop="dateCreated datePublished" datetime="2022-01-13T00:00:00+08:00">2022-01-13</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Springboot/" itemprop="url" rel="index"><span itemprop="name">Springboot</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2022/01/13/springboot/4_springboot_web/" class="post-meta-item leancloud_visitors" data-flag-title="四、Spring Boot 整合 Web 开发" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="返回-JSON-数据"><a href="#返回-JSON-数据" class="headerlink" title="返回 JSON 数据"></a>返回 JSON 数据</h1><h2 id="1-1-默认实现"><a href="#1-1-默认实现" class="headerlink" title="1.1 默认实现"></a>1.1 默认实现</h2><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;JSON 是目前主流的前后端数据传输方式， Spring MVC 中使用消息转换器 HttpMessageConverter 对 JSON 的转换提供了很好的支持，在 Spring Boot 更进 ，对相关配置做了更进一步的简化。默认情况下，当开发者新创建一个 Spring Boot 项目后，添加 Web 依赖，代码如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-web<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<span id="more"></span>
+<p>这个依赖中默认加入了 jackson-databind 作为 JSON 处理器，此时不需要添加额外的 JSON 理器就能返回一段 JSON 了。 新建一个 Person 实体类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> Integer age;</span><br><span class="line">    <span class="meta">@JsonFormat(pattern =&quot;yyyy-MM-dd&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> Date birthday ;</span><br><span class="line">    <span class="comment">//省略get/set方法</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后 PersonController 返回 Person 对象即可：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@GetMapping(&quot;/person&quot;)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Person <span class="title">person</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    Person person = <span class="keyword">new</span> Person();</span><br><span class="line">    person.setName(<span class="string">&quot;zhang san&quot;</span>);</span><br><span class="line">    person.setAge(<span class="number">24</span>);</span><br><span class="line">    person.setBirthday(<span class="keyword">new</span> Date());</span><br><span class="line">    <span class="keyword">return</span> person;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>此时，在浏览器中输入 <a target="_blank" rel="noopener" href="http://localhost:8080/person">http://localhost:8080/person</a>,  即可看到返回了 JSON 数据。<br><img src="https://img-blog.csdnimg.cn/efdeb312c444403c92e1e966bb94dc35.png"><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;这是 Spring Booot 自带的处理方式。如果采用这种方式，那么对于字段忽略、日期格式化等常需求都可以通过注解来解决。这是通过 Spring 中默认提供的 MappingJackson2HttpMessageConert 来实现的，当然开发者在这里也可以根据实际需求自定义 JSON 转换器。</p>
+<h2 id="2-1-自定义转换器"><a href="#2-1-自定义转换器" class="headerlink" title="2.1 自定义转换器"></a>2.1 自定义转换器</h2><p>常见的 JSON 处理器除了 jackson-databind 外， 还有 Gson 和 fastjson。</p>
+<h3 id="2-1-1-使用-Gson"><a href="#2-1-1-使用-Gson" class="headerlink" title="2.1.1 使用 Gson"></a>2.1.1 使用 Gson</h3><p>Gson 是 Google 的一个开源 JSON 解析框架。使用 Gson，需要先除去默认的 jackson-databind，然后加入 Gson 依赖，代码如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"> <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-web<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">exclusions</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">exclusion</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.fasterxml.jackson.core<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jackson-databind<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">exclusion</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">exclusions</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.google.code.gson<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>gson<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>由于 Spring Boot 中默认提供了 Gson 自动转换类 GsonHttpMessageConvertersConfiguration,因此 Gson 的依赖添加成功后 可以像使用 jackson-databind 那样直接使用 Gson 。但是在 Gson 进行转换时，如果想对日期数据进行格式化， 那么还需要开发者自定义 HttpMessageConverter。自定义 HttpMessageConverter 可以通过如下方式。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.google.gson.Gson;</span><br><span class="line"><span class="keyword">import</span> com.google.gson.GsonBuilder;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.annotation.Bean;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.annotation.Configuration;</span><br><span class="line"><span class="keyword">import</span> org.springframework.http.converter.json.GsonHttpMessageConverter;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Modifier;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GsonConfig</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function">GsonHttpMessageConverter <span class="title">gsonHttpMessageConverter</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        GsonHttpMessageConverter converter = <span class="keyword">new</span> GsonHttpMessageConverter();</span><br><span class="line">        GsonBuilder builder = <span class="keyword">new</span> GsonBuilder();</span><br><span class="line">        builder.setDateFormat(<span class="string">&quot;yyyy-MM-dd&quot;</span>);</span><br><span class="line">        builder.excludeFieldsWithModifiers(Modifier.PROTECTED);</span><br><span class="line">        Gson gson = builder.create();</span><br><span class="line">        converter.setGson(gson);</span><br><span class="line">        <span class="keyword">return</span> converter;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>代码解释：</p>
+<ul>
+<li>开发者自己提供一个 GsonHttpMessageConverter 的实例</li>
+<li>设置 Gson 解析时日期的格式</li>
+<li>设置 Gson 解析时修饰符 protected 的字段被过滤掉</li>
+<li>创建 Gson 对象放入 GsonHttpMessageConverter 实例中并返回 converter</li>
+</ul>
+<p>此时，将 Person 类中的 birthday 字段的修饰符改为 protected 代码如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> Integer age;</span><br><span class="line">    <span class="meta">@JsonFormat(pattern =&quot;yyyy-MM-dd&quot;)</span></span><br><span class="line">    <span class="keyword">protected</span> Date birthday ;</span><br><span class="line">    <span class="comment">//省略get/set方法</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>此时，在浏览器中输入 <a target="_blank" rel="noopener" href="http://localhost:8080/person">http://localhost:8080/person</a>,  即可看到返回中的 JSON 数据，其中 birthday 字段被过滤掉了。<br><img src="https://img-blog.csdnimg.cn/247e6e842dd843c2a0e9b5bfdbc49b4b.png"></p>
+<h3 id="2-1-1-使用-fastjson"><a href="#2-1-1-使用-fastjson" class="headerlink" title="2.1.1 使用 fastjson"></a>2.1.1 使用 fastjson</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fastjson 是阿里巴巴的一个开源 JSON 框架，<font color="red">是目前 JSO 解析速度最快的开源框架</font>，该框架也可以集成到 Spring Boot 中。不同于 Gson，fastjson 承完成之后并不能立马使用， 需要开发者提供相应的 HttpMessageConverter 后才能使用，集成 fastjson 的步骤如下。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;（1）首先除去 jackson-databind 依赖，引入 fastjson 依赖：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-web<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">exclusions</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">exclusion</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.fasterxml.jackson.core<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jackson-databind<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">exclusion</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">exclusions</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.alibaba<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>fastjson<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.2.47<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;（2）然后配置 fastjson HttpMessageConverter：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.alibaba.fastjson.serializer.SerializerFeature;</span><br><span class="line"><span class="keyword">import</span> com.alibaba.fastjson.support.config.FastJsonConfig;</span><br><span class="line"><span class="keyword">import</span> com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.annotation.Bean;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.annotation.Configuration;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.nio.charset.Charset;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyFastJsonConfig</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function">FastJsonHttpMessageConverter <span class="title">fastJsonHttpMessageConverter</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        FastJsonHttpMessageConverter converter = <span class="keyword">new</span> FastJsonHttpMessageConverter();</span><br><span class="line">        FastJsonConfig config = <span class="keyword">new</span> FastJsonConfig();</span><br><span class="line">        config.setDateFormat(<span class="string">&quot;yyyy-MM-dd&quot;</span>);</span><br><span class="line">        config.setCharset(Charset.forName(<span class="string">&quot;utf-8&quot;</span>));</span><br><span class="line">        config.setSerializerFeatures(</span><br><span class="line">                SerializerFeature.WriteClassName,</span><br><span class="line">                SerializerFeature.WriteMapNullValue,</span><br><span class="line">                SerializerFeature.PrettyFormat,</span><br><span class="line">                SerializerFeature.WriteNullListAsEmpty,</span><br><span class="line">                SerializerFeature.WriteNullStringAsEmpty);</span><br><span class="line">        converter.setFastJsonConfig(config);</span><br><span class="line">        <span class="keyword">return</span> converter;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;（3）MyFastJsonConfig 配置完成后，还需要配置一下响应编码，否则返回的 JSON 中文会乱码，在application. properties 添加如下配置：</p>
+<blockquote>
+<p>spring.http.encoding.force-response=true</p>
+</blockquote>
+<p>此时，在浏览器中输入 <a target="_blank" rel="noopener" href="http://localhost:8080/person">http://localhost:8080/person</a>,  即可看到返回中的 JSON 数据<br><img src="https://img-blog.csdnimg.cn/3d5fd1a9fcbc495d861f4b29279ce106.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBA6Iql2YfZpQ==,size_20,color_FFFFFF,t_70,g_se,x_16"><br><font color="red"><strong>扩展：</strong></font>对于 FastJsonHttpMessageConverter 的配置，除了上面这种方式之外，还有另一种方式。在 Spring Boot 项目中，当开发者引入 spring-boot-starter-web 依赖之后，该依赖又依赖了spring-boot-autoconfigure 在这个自动化配置中，有一个 WebMvcAutoConfiguration 类提供了对 Spring MVC 最基本的配置， 如果某一项自动化配置不满足开发需求，开发者可以针对该项自定义配置，只需要实现 WebMvcConfigurer 接口即可（在 Spring 是通过继承 WebMvcConfigurerAdapter 类来实现的），代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.alibaba.fastjson.serializer.SerializerFeature;</span><br><span class="line"><span class="keyword">import</span> com.alibaba.fastjson.support.config.FastJsonConfig;</span><br><span class="line"><span class="keyword">import</span> com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.annotation.Configuration;</span><br><span class="line"><span class="keyword">import</span> org.springframework.http.converter.HttpMessageConverter;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.servlet.config.annotation.WebMvcConfigurer;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.nio.charset.Charset;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyWebMvcConfig</span> <span class="keyword">implements</span> <span class="title">WebMvcConfigurer</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">configureMessageConverters</span><span class="params">(List&lt;HttpMessageConverter&lt;?&gt;&gt; converters)</span> </span>&#123;</span><br><span class="line">        FastJsonHttpMessageConverter converter = <span class="keyword">new</span> FastJsonHttpMessageConverter();</span><br><span class="line">        FastJsonConfig config = <span class="keyword">new</span> FastJsonConfig();</span><br><span class="line">        config.setDateFormat(<span class="string">&quot;yyyy-MM-dd&quot;</span>);</span><br><span class="line">        config.setCharset(Charset.forName(<span class="string">&quot;utf-8&quot;</span>));</span><br><span class="line">        config.setSerializerFeatures(</span><br><span class="line">                SerializerFeature.WriteClassName,</span><br><span class="line">                SerializerFeature.WriteMapNullValue,</span><br><span class="line">                SerializerFeature.PrettyFormat,</span><br><span class="line">                SerializerFeature.WriteNullListAsEmpty,</span><br><span class="line">                SerializerFeature.WriteNullStringAsEmpty);</span><br><span class="line">                converter.setFastJsonConfig(config);</span><br><span class="line">        converters.add(converter);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>代码解释：</p>
+<ul>
+<li>自定义 MyWebMvcConfig 类并实现 WebMvcConfigurer 接口中的 configureMessageConverters方法</li>
+<li>将自定义的 FastJsonHttpMessageConverter 加入 converters</li>
+</ul>
+<p><font color="red"><strong>注意：</strong> </font>如果使用了 Gson ，也可以采用这种方式配置，但是不推荐。 因为当项目中没有 <em>GsonHttpMessageConverter</em> 时， Spring Boot 自己会提供一个<em>GsonHttpMessageConverter</em> ，此时重写 <em>configureMessageConverters</em> 方法，参数converters 中已经有 <em>GsonHttpMessageConverter</em> 的实例了，需要替换已有的 <em>GsonHttpMessageConverter</em> 实例，操作比较麻烦，所以对于 Gson，推荐直接提供 <em>GsonHttpMessageConverter</em></p>
+<h1 id="二、静态资源访问"><a href="#二、静态资源访问" class="headerlink" title="二、静态资源访问"></a>二、静态资源访问</h1><h2 id="2-1-默认策略"><a href="#2-1-默认策略" class="headerlink" title="2.1 默认策略"></a>2.1 默认策略</h2><h2 id="2-2-自定义策略"><a href="#2-2-自定义策略" class="headerlink" title="2.2 自定义策略"></a>2.2 自定义策略</h2><h1 id="三、文件上传"><a href="#三、文件上传" class="headerlink" title="三、文件上传"></a>三、文件上传</h1><h2 id="3-1-单文件上传"><a href="#3-1-单文件上传" class="headerlink" title="3.1 单文件上传"></a>3.1 单文件上传</h2><h2 id="3-2-多文件上传"><a href="#3-2-多文件上传" class="headerlink" title="3.2 多文件上传"></a>3.2 多文件上传</h2><h1 id="四、-ControllerAdvice"><a href="#四、-ControllerAdvice" class="headerlink" title="四、@ControllerAdvice"></a>四、@ControllerAdvice</h1><h2 id="4-1-全局异常处理"><a href="#4-1-全局异常处理" class="headerlink" title="4.1 全局异常处理"></a>4.1 全局异常处理</h2><h2 id="4-2-添加全局数据"><a href="#4-2-添加全局数据" class="headerlink" title="4.2 添加全局数据"></a>4.2 添加全局数据</h2><h2 id="4-3-请求参数预处理"><a href="#4-3-请求参数预处理" class="headerlink" title="4.3 请求参数预处理"></a>4.3 请求参数预处理</h2><h1 id="五、自定义错误页"><a href="#五、自定义错误页" class="headerlink" title="五、自定义错误页"></a>五、自定义错误页</h1><h2 id="5-1-简单配直"><a href="#5-1-简单配直" class="headerlink" title="5.1 简单配直"></a>5.1 简单配直</h2><h2 id="5-2-复杂配直"><a href="#5-2-复杂配直" class="headerlink" title="5.2 复杂配直"></a>5.2 复杂配直</h2><h1 id="六、CORS-支持"><a href="#六、CORS-支持" class="headerlink" title="六、CORS 支持"></a>六、CORS 支持</h1><h1 id="七、配置类与-XML-配置"><a href="#七、配置类与-XML-配置" class="headerlink" title="七、配置类与 XML 配置"></a>七、配置类与 XML 配置</h1><h1 id="八、拦截器"><a href="#八、拦截器" class="headerlink" title="八、拦截器"></a>八、拦截器</h1><h1 id="九、启动系统任务"><a href="#九、启动系统任务" class="headerlink" title="九、启动系统任务"></a>九、启动系统任务</h1><h2 id="9-1-CommandLineRunner"><a href="#9-1-CommandLineRunner" class="headerlink" title="9.1 CommandLineRunner"></a>9.1 CommandLineRunner</h2><h2 id="9-2-ApplicationRunner"><a href="#9-2-ApplicationRunner" class="headerlink" title="9.2 ApplicationRunner"></a>9.2 ApplicationRunner</h2><h1 id="十、整合-Servlet-Filter-Listener"><a href="#十、整合-Servlet-Filter-Listener" class="headerlink" title="十、整合 Servlet Filter Listener"></a>十、整合 Servlet Filter Listener</h1><h1 id="十一、路径映射"><a href="#十一、路径映射" class="headerlink" title="十一、路径映射"></a>十一、路径映射</h1><h1 id="十二、配置-AOP"><a href="#十二、配置-AOP" class="headerlink" title="十二、配置 AOP"></a>十二、配置 AOP</h1><h2 id="12-1-AOP-简介"><a href="#12-1-AOP-简介" class="headerlink" title="12.1 AOP 简介"></a>12.1 AOP 简介</h2><h2 id="12-2-Spring-Boot"><a href="#12-2-Spring-Boot" class="headerlink" title="12.2 Spring Boot"></a>12.2 Spring Boot</h2><h1 id="十三、其他"><a href="#十三、其他" class="headerlink" title="十三、其他"></a>十三、其他</h1><h2 id="13-1-自定义欢迎页"><a href="#13-1-自定义欢迎页" class="headerlink" title="13.1 自定义欢迎页"></a>13.1 自定义欢迎页</h2><h2 id="13-2-自定义-fav1con"><a href="#13-2-自定义-fav1con" class="headerlink" title="13.2 自定义 fav1con"></a>13.2 自定义 fav1con</h2><h2 id="13-3-除去某个自动配置"><a href="#13-3-除去某个自动配置" class="headerlink" title="13.3 除去某个自动配置"></a>13.3 除去某个自动配置</h2><h1 id="一、整合-Thymeleaf"><a href="#一、整合-Thymeleaf" class="headerlink" title="一、整合 Thymeleaf"></a>一、整合 Thymeleaf</h1><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Thyme leaf 是新一代 Java 模板引擎，类似于 Velocity、 FreeMarker 等传统 Java 模板引擎。与传统Java 模板引擎不同的是 Thymeleaf 支持 HTML 原型，既可以让前端工程师在浏览器中直接打开查看样式， 也可以让后端工程师结合真实数据查看显示效果。 同时，Spring Boot 提供了 Thymeleaf 自动化配置解决方案，因此在 Spring Boot 中使用 Thymeleaf 非常方便。 Spring Boot 整合 Thymeleaf 主要可通过如下步骤：</p>
+<h2 id="1-创建工程，添加依赖"><a href="#1-创建工程，添加依赖" class="headerlink" title="1. 创建工程，添加依赖"></a>1. 创建工程，添加依赖</h2><p>新建 Spring Boot 工程，然后添加 spring-boot-starter-web 和 spring-boot-starter-thymeleaf 依赖，代码如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-thymeleaf<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-web<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="2-配置-Thymeleaf"><a href="#2-配置-Thymeleaf" class="headerlink" title="2. 配置 Thymeleaf"></a>2. 配置 Thymeleaf</h2><p>Spring Boot 为 Thymleaf 提供了自动化配置类 ThymeleafAutoConfiguration ，相关的配置属性在ThymleafPropertie 类中， ThymleafProperti 部分源码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@ConfigurationProperties(prefix = &quot;spring.thymeleaf&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ThymeleafProperties</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Charset DEFAULT_ENCODING = StandardCharsets.UTF_8;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String DEFAULT_PREFIX = <span class="string">&quot;classpath:/templates/&quot;</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String DEFAULT_SUFFIX = <span class="string">&quot;.html&quot;</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//省略.....  </span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>由此配置可以看到，默认的模板位置在 classpath:/templates／，默认的模板后缀为 .html 如果使用IntlliJ IDEA 工具创建 Spring Boot 项目，templates 文件夹默认就会创建。<br>当然，如果开发者想对默认的 Thymeleaf 配置参数进行自定义配置，那么可以直接在application.propertie 中进行配置，部分常见配置如下：<br>分源码如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 是否开启缓存，开发时可设置为 false ，默认为 true</span></span><br><span class="line"><span class="string">spring.thymeleaf.cache=true</span></span><br><span class="line"><span class="comment"># 检查模板是否存在，默认为 true</span></span><br><span class="line"><span class="string">spring.thymeleaf.check-template=true</span></span><br><span class="line"><span class="comment">#检查模板位置是否存在，默认为 true</span></span><br><span class="line"><span class="string">spring.thymeleaf.check-template-location=true</span></span><br><span class="line"><span class="comment"># 模板文件编码</span></span><br><span class="line"><span class="string">spring.thymeleaf.encoding=utf-8</span></span><br><span class="line"><span class="comment"># 模板文件位置</span></span><br><span class="line"><span class="string">spring.thymeleaf.prefix=classpath:/templates/</span></span><br><span class="line"><span class="comment">#Content Type 配置</span></span><br><span class="line"><span class="string">spring.thymeleaf.servlet.content-type=text/html</span></span><br><span class="line"><span class="comment"># 模板文件后缀</span></span><br><span class="line"><span class="string">spring.thymeleaf.suffix=.html</span></span><br></pre></td></tr></table></figure>
+<h2 id="3-配置控制器"><a href="#3-配置控制器" class="headerlink" title="3. 配置控制器"></a>3. 配置控制器</h2><p>创建 Book 实体类，然后在 Controller 中返回 ModelAndView ，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Book</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Integer id;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">protected</span> String author;</span><br><span class="line">    <span class="comment">//省略get/set方法</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BookController</span> </span>&#123;</span><br><span class="line">    <span class="meta">@GetMapping(&quot;/books&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ModelAndView <span class="title">books</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        List&lt;Book&gt; books = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        Book bl = <span class="keyword">new</span> Book();</span><br><span class="line">        bl.setId(<span class="number">1</span>);</span><br><span class="line">        bl.setAuthor(<span class="string">&quot;罗贯中&quot;</span>);</span><br><span class="line">        bl.setName(<span class="string">&quot;三国演义&quot;</span>);</span><br><span class="line">        Book b2 = <span class="keyword">new</span> Book();</span><br><span class="line">        b2.setId(<span class="number">2</span>);</span><br><span class="line">        b2.setAuthor(<span class="string">&quot;曹雪芹&quot;</span>);</span><br><span class="line">        b2.setName(<span class="string">&quot;红楼梦&quot;</span>);</span><br><span class="line">        books.add(bl);</span><br><span class="line">        books.add(b2);</span><br><span class="line">        ModelAndView mv = <span class="keyword">new</span> ModelAndView();</span><br><span class="line">        mv.addObject(<span class="string">&quot;books&quot;</span>, books);</span><br><span class="line">        mv.setViewName(<span class="string">&quot;books&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> mv;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="4-创建视图"><a href="#4-创建视图" class="headerlink" title="4. 创建视图"></a>4. 创建视图</h2><p>在resources 目录下的 templates 录中创建 books.html 具体代码如下</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">&quot;en&quot;</span> <span class="attr">xmlns:th</span>=<span class="string">&quot;http://www.thymeleaf.org&quot;</span> &gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">title</span>&gt;</span>图书列表<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">table</span> <span class="attr">border</span>=<span class="string">&quot;1&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">tr</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">td</span>&gt;</span>图书编号<span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">td</span>&gt;</span>图书名称<span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">td</span>&gt;</span>图书作者<span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">tr</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">tr</span> <span class="attr">th:each</span>=<span class="string">&quot;book:$&#123;books &#125;&quot;</span> &gt;</span></span><br><span class="line"> <span class="tag">&lt;<span class="name">td</span> <span class="attr">th:text</span>=<span class="string">&quot;$&#123; book.id &#125;&quot;</span> &gt;</span><span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;<span class="name">td</span> <span class="attr">th:text</span>=<span class="string">&quot;$&#123; book.name &#125;&quot;</span> &gt;</span><span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;<span class="name">td</span> <span class="attr">th:text</span> = <span class="string">&quot;$&#123; book.author &#125;&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">tr</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">table</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="5-运行"><a href="#5-运行" class="headerlink" title="5. 运行"></a>5. 运行</h2><p>在浏览器地址栏中输入“<a target="_blank" rel="noopener" href="http://localhost:8080/books%E2%80%9D">http://localhost:8080/books”</a>, 即可看到运行结果。<br><img src="https://img-blog.csdnimg.cn/69dd8f5f24e34a30838c0bc23a17bbe5.png"></p>
+<h1 id="二、整合-FreeMarker"><a href="#二、整合-FreeMarker" class="headerlink" title="二、整合 FreeMarker"></a>二、整合 FreeMarker</h1><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FreeMarker 是一个非常古老的模板引擎，可以用 Web 环境或者非 Web 境中。与 Thymeleaf 不同 FreeMarker 需要经过解析才能够在浏览器中展示出来。 FreeMarker 不仅可以用来配置 HTML页面模板，也可以作为电子邮件模板、配置文件模板以及源码模板等。 Spring Boot 中对 FreeMarker 整合提供了很好的支持，主要整合步骤如下：</p>
+<h2 id="1-创建项目-，添加依赖"><a href="#1-创建项目-，添加依赖" class="headerlink" title="1. 创建项目 ，添加依赖"></a>1. 创建项目 ，添加依赖</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-freemarker<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-web<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="2-配置-FreeMarker"><a href="#2-配置-FreeMarker" class="headerlink" title="2. 配置 FreeMarker"></a>2. 配置 FreeMarker</h2><p>Spring Boot 对 FreeMarker 也提供了自动化配置类 FreeMarkerAutoConfiguration，相关的配置属性在 FreeMarkerProperties 中，FreeMarkerProperties 部分源码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@ConfigurationProperties(prefix = &quot;spring.freemarker&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FreeMarkerProperties</span> <span class="keyword">extends</span> <span class="title">AbstractTemplateViewResolverProperties</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String DEFAULT_TEMPLATE_LOADER_PATH = <span class="string">&quot;classpath:/templates/&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String DEFAULT_PREFIX = <span class="string">&quot;&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String DEFAULT_SUFFIX = <span class="string">&quot;.ftlh&quot;</span>;</span><br><span class="line">    <span class="keyword">private</span> Map&lt;String, String&gt; settings = <span class="keyword">new</span> HashMap();</span><br><span class="line">    <span class="keyword">private</span> String[] templateLoaderPath = <span class="keyword">new</span> String[]&#123;<span class="string">&quot;classpath:/templates/&quot;</span>&#125;;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> preferFileSystemAccess;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">FreeMarkerProperties</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(<span class="string">&quot;&quot;</span>, <span class="string">&quot;.ftlh&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//........</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从该默认配置中可以看到， FreeMarker 默认模板位置和 Thymeleaf 一样 ，都在classpath:/templates 中， 默认文件后缀是.ftlh。开发者可以在 application.properties 中对这些默认配置进行修改，部分常见配置如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># HttpServletRequest 的属性是否可以覆盖 controller i:p model 的同名项</span></span><br><span class="line"><span class="string">spring.freemarker.allow-request-override=false</span></span><br><span class="line"><span class="comment"># HttpSession 的属性是否可以覆盖 controller中model 的同名项</span></span><br><span class="line"><span class="string">spring.freemarker.allow-session-override=false</span></span><br><span class="line"><span class="comment"># 是否开启缓存</span></span><br><span class="line"><span class="string">spring.freemarker.cache=false</span></span><br><span class="line"><span class="comment"># 模板文件编码</span></span><br><span class="line"><span class="string">spring.freemarker.charset=UTF-8</span></span><br><span class="line"><span class="comment"># 是否检查模板位置</span></span><br><span class="line"><span class="string">spring.freemarker.check-template-location=true</span></span><br><span class="line"><span class="comment">#Content Type 的值</span></span><br><span class="line"><span class="string">spring.freemarker.content-type=text/html</span></span><br><span class="line"><span class="comment"># 是否将 HttpServletRequest 中的属性添加到 Model 中</span></span><br><span class="line"><span class="string">spring.freemarker.expose-request-attributes=false</span></span><br><span class="line"><span class="comment"># 是否将 HttpSession 中的属性添加到 Model</span></span><br><span class="line"><span class="string">spring.freemarker.expose-session-attributes=false</span></span><br><span class="line"><span class="comment"># 模板文件后缀</span></span><br><span class="line"><span class="string">spring.freemarker.suffix=.ftl</span></span><br><span class="line"><span class="comment"># 模板文件位置</span></span><br><span class="line"><span class="string">spring.freemarker.template-loader-path=classpath:/templates/</span></span><br></pre></td></tr></table></figure>
+<h2 id="3-配置控制器-1"><a href="#3-配置控制器-1" class="headerlink" title="3. 配置控制器"></a>3. 配置控制器</h2><p>创建 Book 实体类，然后在 Controller 中返回 ModelAndView ，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Book</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Integer id;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">protected</span> String author;</span><br><span class="line">    <span class="comment">//省略get/set方法</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BookController</span> </span>&#123;</span><br><span class="line">    <span class="meta">@GetMapping(&quot;/books&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ModelAndView <span class="title">books</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        List&lt;Book&gt; books = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        Book bl = <span class="keyword">new</span> Book();</span><br><span class="line">        bl.setId(<span class="number">1</span>);</span><br><span class="line">        bl.setAuthor(<span class="string">&quot;罗贯中&quot;</span>);</span><br><span class="line">        bl.setName(<span class="string">&quot;三国演义&quot;</span>);</span><br><span class="line">        Book b2 = <span class="keyword">new</span> Book();</span><br><span class="line">        b2.setId(<span class="number">2</span>);</span><br><span class="line">        b2.setAuthor(<span class="string">&quot;曹雪芹&quot;</span>);</span><br><span class="line">        b2.setName(<span class="string">&quot;红楼梦&quot;</span>);</span><br><span class="line">        books.add(bl);</span><br><span class="line">        books.add(b2);</span><br><span class="line">        ModelAndView mv = <span class="keyword">new</span> ModelAndView();</span><br><span class="line">        mv.addObject(<span class="string">&quot;books&quot;</span>, books);</span><br><span class="line">        mv.setViewName(<span class="string">&quot;books&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> mv;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="4-创建视图-1"><a href="#4-创建视图-1" class="headerlink" title="4. 创建视图"></a>4. 创建视图</h2><p>按照配置文件，在 resources/templates 目录下创建 books.ftl 文件， 内容如下：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">&quot;en&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>图书列表<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">table</span> <span class="attr">border</span>=<span class="string">&quot;1&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">tr</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">td</span>&gt;</span>图书编号<span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">td</span>&gt;</span>图书名称<span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">td</span>&gt;</span>图书作者<span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">tr</span>&gt;</span></span><br><span class="line">    &lt;#if books?? &amp;&amp; (books?size &gt; 0)&gt;</span><br><span class="line">        &lt;#list books as book&gt;</span><br><span class="line">            <span class="tag">&lt;<span class="name">tr</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">td</span>&gt;</span>$&#123;book.id&#125;<span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">td</span>&gt;</span>$&#123;book.name&#125;<span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">td</span>&gt;</span>$&#123;book.author&#125;<span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">tr</span>&gt;</span></span><br><span class="line">        &lt;/#list&gt;</span><br><span class="line">    &lt;/#if&gt;</span><br><span class="line"><span class="tag">&lt;/<span class="name">table</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="5-运行-1"><a href="#5-运行-1" class="headerlink" title="5. 运行"></a>5. 运行</h2><p>在浏览器地址栏中输入“<a target="_blank" rel="noopener" href="http://localhost:8080/books%E2%80%9D">http://localhost:8080/books”</a>, 即可看到运行结果。<br><img src="https://img-blog.csdnimg.cn/69dd8f5f24e34a30838c0bc23a17bbe5.png"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Springboot/" rel="tag"># Springboot</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/01/12/springboot/3_springboot_view/" rel="prev" title="三、Spring Boot 视图层技术">
+      <i class="fa fa-chevron-left"></i> 三、Spring Boot 视图层技术
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%BF%94%E5%9B%9E-JSON-%E6%95%B0%E6%8D%AE"><span class="nav-text">返回 JSON 数据</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-%E9%BB%98%E8%AE%A4%E5%AE%9E%E7%8E%B0"><span class="nav-text">1.1 默认实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-%E8%87%AA%E5%AE%9A%E4%B9%89%E8%BD%AC%E6%8D%A2%E5%99%A8"><span class="nav-text">2.1 自定义转换器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-1-%E4%BD%BF%E7%94%A8-Gson"><span class="nav-text">2.1.1 使用 Gson</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-1-%E4%BD%BF%E7%94%A8-fastjson"><span class="nav-text">2.1.1 使用 fastjson</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E8%AE%BF%E9%97%AE"><span class="nav-text">二、静态资源访问</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-%E9%BB%98%E8%AE%A4%E7%AD%96%E7%95%A5"><span class="nav-text">2.1 默认策略</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-%E8%87%AA%E5%AE%9A%E4%B9%89%E7%AD%96%E7%95%A5"><span class="nav-text">2.2 自定义策略</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0"><span class="nav-text">三、文件上传</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-%E5%8D%95%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0"><span class="nav-text">3.1 单文件上传</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-%E5%A4%9A%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0"><span class="nav-text">3.2 多文件上传</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9B%9B%E3%80%81-ControllerAdvice"><span class="nav-text">四、@ControllerAdvice</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86"><span class="nav-text">4.1 全局异常处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-%E6%B7%BB%E5%8A%A0%E5%85%A8%E5%B1%80%E6%95%B0%E6%8D%AE"><span class="nav-text">4.2 添加全局数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-3-%E8%AF%B7%E6%B1%82%E5%8F%82%E6%95%B0%E9%A2%84%E5%A4%84%E7%90%86"><span class="nav-text">4.3 请求参数预处理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E8%87%AA%E5%AE%9A%E4%B9%89%E9%94%99%E8%AF%AF%E9%A1%B5"><span class="nav-text">五、自定义错误页</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#5-1-%E7%AE%80%E5%8D%95%E9%85%8D%E7%9B%B4"><span class="nav-text">5.1 简单配直</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-2-%E5%A4%8D%E6%9D%82%E9%85%8D%E7%9B%B4"><span class="nav-text">5.2 复杂配直</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%AD%E3%80%81CORS-%E6%94%AF%E6%8C%81"><span class="nav-text">六、CORS 支持</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%83%E3%80%81%E9%85%8D%E7%BD%AE%E7%B1%BB%E4%B8%8E-XML-%E9%85%8D%E7%BD%AE"><span class="nav-text">七、配置类与 XML 配置</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%AB%E3%80%81%E6%8B%A6%E6%88%AA%E5%99%A8"><span class="nav-text">八、拦截器</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B9%9D%E3%80%81%E5%90%AF%E5%8A%A8%E7%B3%BB%E7%BB%9F%E4%BB%BB%E5%8A%A1"><span class="nav-text">九、启动系统任务</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#9-1-CommandLineRunner"><span class="nav-text">9.1 CommandLineRunner</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-2-ApplicationRunner"><span class="nav-text">9.2 ApplicationRunner</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8D%81%E3%80%81%E6%95%B4%E5%90%88-Servlet-Filter-Listener"><span class="nav-text">十、整合 Servlet Filter Listener</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8D%81%E4%B8%80%E3%80%81%E8%B7%AF%E5%BE%84%E6%98%A0%E5%B0%84"><span class="nav-text">十一、路径映射</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8D%81%E4%BA%8C%E3%80%81%E9%85%8D%E7%BD%AE-AOP"><span class="nav-text">十二、配置 AOP</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#12-1-AOP-%E7%AE%80%E4%BB%8B"><span class="nav-text">12.1 AOP 简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-2-Spring-Boot"><span class="nav-text">12.2 Spring Boot</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8D%81%E4%B8%89%E3%80%81%E5%85%B6%E4%BB%96"><span class="nav-text">十三、其他</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#13-1-%E8%87%AA%E5%AE%9A%E4%B9%89%E6%AC%A2%E8%BF%8E%E9%A1%B5"><span class="nav-text">13.1 自定义欢迎页</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#13-2-%E8%87%AA%E5%AE%9A%E4%B9%89-fav1con"><span class="nav-text">13.2 自定义 fav1con</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#13-3-%E9%99%A4%E5%8E%BB%E6%9F%90%E4%B8%AA%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE"><span class="nav-text">13.3 除去某个自动配置</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%95%B4%E5%90%88-Thymeleaf"><span class="nav-text">一、整合 Thymeleaf</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%88%9B%E5%BB%BA%E5%B7%A5%E7%A8%8B%EF%BC%8C%E6%B7%BB%E5%8A%A0%E4%BE%9D%E8%B5%96"><span class="nav-text">1. 创建工程，添加依赖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E9%85%8D%E7%BD%AE-Thymeleaf"><span class="nav-text">2. 配置 Thymeleaf</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E9%85%8D%E7%BD%AE%E6%8E%A7%E5%88%B6%E5%99%A8"><span class="nav-text">3. 配置控制器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E5%88%9B%E5%BB%BA%E8%A7%86%E5%9B%BE"><span class="nav-text">4. 创建视图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E8%BF%90%E8%A1%8C"><span class="nav-text">5. 运行</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%95%B4%E5%90%88-FreeMarker"><span class="nav-text">二、整合 FreeMarker</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%88%9B%E5%BB%BA%E9%A1%B9%E7%9B%AE-%EF%BC%8C%E6%B7%BB%E5%8A%A0%E4%BE%9D%E8%B5%96"><span class="nav-text">1. 创建项目 ，添加依赖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E9%85%8D%E7%BD%AE-FreeMarker"><span class="nav-text">2. 配置 FreeMarker</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E9%85%8D%E7%BD%AE%E6%8E%A7%E5%88%B6%E5%99%A8-1"><span class="nav-text">3. 配置控制器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E5%88%9B%E5%BB%BA%E8%A7%86%E5%9B%BE-1"><span class="nav-text">4. 创建视图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E8%BF%90%E8%A1%8C-1"><span class="nav-text">5. 运行</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Wi Gang"
+      src="/images/WechatIMG22.jpg">
+  <p class="site-author-name" itemprop="name">Wi Gang</p>
+  <div class="site-description" itemprop="description">这个人没有简介哎😮‍💨😮‍💨😮‍💨😮‍💨</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/wi-gang" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;wi-gang" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_42217906" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_42217906" rel="noopener" target="_blank"><i class="book fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Wi Gang</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+<script>
+  (function() {
+    function leancloudSelector(url) {
+      url = encodeURI(url);
+      return document.getElementById(url).querySelector('.leancloud-visitors-count');
+    }
+
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = decodeURI(visitors.id);
+      var title = visitors.dataset.flagTitle;
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            leancloudSelector(url).innerText = counter.time + 1;
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .catch(error => {
+                console.error('Failed to save visitor count', error);
+              });
+          } else {
+              leancloudSelector(url).innerText = 'Counter not initialized! More info at console err msg.';
+              console.error('ATTENTION! LeanCloud counter has security bug, see how to solve it here: https://github.com/theme-next/hexo-leancloud-counter-security. \n However, you can still use LeanCloud without security, by setting `security` option to `false`.');
+            
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return decodeURI(element.id);
+      });
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url: { '$in': entries } })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          for (let url of entries) {
+            let target = results.find(item => item.url === url);
+            leancloudSelector(url).innerText = target ? target.time : 0;
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    let { app_id, app_key, server_url } = {"enable":true,"app_id":"aGKOLEbOYGdHOagFQ9qszitR-gzGzoHsz","app_key":"iqraOa6xtVIhbLws3tuaFaPP","server_url":null,"security":true};
+    function fetchData(api_server) {
+      var Counter = (method, url, data) => {
+        return fetch(`${api_server}/1.1${url}`, {
+          method,
+          headers: {
+            'X-LC-Id'     : app_id,
+            'X-LC-Key'    : app_key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        if (CONFIG.hostname !== location.hostname) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    }
+
+    let api_server = app_id.slice(-9) !== '-MdYXbMMI' ? server_url : `https://${app_id.slice(0, 8).toLowerCase()}.api.lncldglobal.com`;
+
+    if (api_server) {
+      fetchData(api_server);
+    } else {
+      fetch('https://app-router.leancloud.cn/2/route?appId=' + app_id)
+        .then(response => response.json())
+        .then(({ api_server }) => {
+          fetchData('https://' + api_server);
+        });
+    }
+  })();
+</script>
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
